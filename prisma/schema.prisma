@@ -11,3 +11,109 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  projects  Project[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Project {
+  id               String              @id @default(uuid())
+
+  title            String
+  slug             String              @unique
+  shortDescription String
+  description      String
+
+  thumbnail        String
+
+  githubUrl        String?
+  liveUrl          String?
+
+  role             String?
+
+  featured         Boolean             @default(false)
+  isPublished      Boolean             @default(false)
+
+  categoryId       String
+  category         Category            @relation(fields: [categoryId], references: [id])
+
+  projectImages    ProjectImage[]
+  technologies     ProjectTechnology[]
+
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([categoryId])
+}
+
+model ProjectImage {
+  id         String   @id @default(uuid())
+
+  imageUrl   String
+  caption    String?
+  sortOrder  Int      @default(0)
+
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model Technology {
+  id        String              @id @default(uuid())
+
+  name      String              @unique
+  icon      String?
+
+  projects  ProjectTechnology[]
+
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+model ProjectTechnology {
+  projectId    String
+  technologyId String
+
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  technology   Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, technologyId])
+}
+
+model Skill {
+  id        String   @id @default(uuid())
+
+  name      String
+  icon      String?
+  category  String?
+  order     Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
